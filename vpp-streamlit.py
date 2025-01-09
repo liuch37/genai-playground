@@ -18,6 +18,7 @@ blank_canvas = np.full((*canvas_size, 3), 255, dtype=np.uint8)
 # Sidebar for user controls
 st.sidebar.header("Controls")
 uploaded_image = st.sidebar.file_uploader("Upload an Image for Product Canvas", type=["png", "jpg", "jpeg"])
+product_prompt = st.sidebar.text_input("Enter a Text Prompt for your Product", placeholder="Type your product prompt here...")
 text_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
 insert_button = st.sidebar.button("Insert Image")
 reset_button = st.sidebar.button("Reset Composition Canvas")
