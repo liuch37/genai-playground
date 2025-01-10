@@ -12,7 +12,7 @@ import numpy as np
 st.set_page_config(page_title="Content Generation", layout="wide")
 
 # Initialize the canvas size and a blank white canvas
-canvas_size = (1024, 1024)
+canvas_size = (512, 512)
 blank_canvas = np.full((*canvas_size, 3), 255, dtype=np.uint8)
 
 # Sidebar for user controls
@@ -21,9 +21,10 @@ uploaded_image = st.sidebar.file_uploader("Upload an Image for Product Canvas", 
 product_prompt = st.sidebar.text_input("Enter a Text Prompt for your Product", placeholder="Type your product prompt here...")
 text_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
 insert_button = st.sidebar.button("Insert Image")
+generate_button = st.sidebar.button("Generate Image")
 reset_button = st.sidebar.button("Reset Composition Canvas")
 
-# Left Canvas
+# Product Canvas
 st.subheader("Product Canvas")
 if uploaded_image:
     left_canvas = Image.open(uploaded_image).convert("RGB")
@@ -32,28 +33,32 @@ if uploaded_image:
 else:
     st.info("Upload an image to display on the Product Canvas.")
 
-# Right Canvas
-st.subheader("Position Canvas: Draw a Bounding Box for Product Placement")
-if reset_button:
-    st.session_state["canvas_image"] = blank_canvas.copy()
+# Create two columns for Position Canvas and Composition Canvas
+col1, col2 = st.columns(2)
 
-# Initialize session state for the canvas
-if "canvas_image" not in st.session_state:
-    st.session_state["canvas_image"] = blank_canvas.copy()
+with col1:
+    # Position Canvas
+    st.subheader("Position Canvas")
+    if reset_button:
+        st.session_state["canvas_image"] = blank_canvas.copy()
 
-# Interactive drawing canvas
-canvas_result = st_canvas(
-    fill_color="rgba(0, 0, 0, 0)",  # Transparent fill
-    stroke_width=3,
-    stroke_color="red",
-    background_color="#FFFFFF",
-    background_image=Image.fromarray(blank_canvas.copy()),
-    update_streamlit=True,
-    height=canvas_size[0],
-    width=canvas_size[1],
-    drawing_mode="rect",  # Rectangle drawing mode
-    key="canvas",
-)
+    # Initialize session state for the canvas
+    if "canvas_image" not in st.session_state:
+        st.session_state["canvas_image"] = blank_canvas.copy()
+
+    # Interactive drawing canvas
+    canvas_result = st_canvas(
+        fill_color="rgba(0, 0, 0, 0)",  # Transparent fill
+        stroke_width=3,
+        stroke_color="red",
+        background_color="#FFFFFF",
+        background_image=Image.fromarray(blank_canvas.copy()),
+        update_streamlit=True,
+        height=canvas_size[0],
+        width=canvas_size[1],
+        drawing_mode="rect",  # Rectangle drawing mode
+        key="canvas",
+    )
 
 # Process bounding boxes and insert image
 if insert_button:
@@ -76,7 +81,8 @@ if insert_button:
     else:
         st.warning("Please upload an image and draw bounding boxes first.")
 
-# Display the updated right canvas
-st.subheader("Composition Canvas")
-if "canvas_image" in st.session_state:
-    st.image(st.session_state["canvas_image"], caption="Composition Canvas", use_container_width=True)
+with col2:
+    # Composition Canvas
+    st.subheader("Composition Canvas")
+    if "canvas_image" in st.session_state:
+        st.image(st.session_state["canvas_image"], caption="Composition Canvas", width=canvas_size[0])
