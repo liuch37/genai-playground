@@ -4,7 +4,6 @@ import json
 import logging
 from PIL import Image
 import numpy as np
-import cv2
 import io
 from botocore.config import Config
 from botocore.exceptions import ClientError
