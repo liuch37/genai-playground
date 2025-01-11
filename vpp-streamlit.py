@@ -7,6 +7,7 @@ import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image, ImageDraw
 import numpy as np
+from outpainting import outpaint_with_mask_prompt
 
 # Set up the page layout
 st.set_page_config(page_title="Content Generation", layout="wide")
@@ -19,7 +20,7 @@ blank_canvas = np.full((*canvas_size, 3), 255, dtype=np.uint8)
 st.sidebar.header("Controls")
 uploaded_image = st.sidebar.file_uploader("Upload an Image for Product Canvas", type=["png", "jpg", "jpeg"])
 product_prompt = st.sidebar.text_input("Enter a Text Prompt for your Product", placeholder="Type your product prompt here...")
-text_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
+background_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
 insert_button = st.sidebar.button("Insert Image")
 generate_button = st.sidebar.button("Generate Image")
 reset_button = st.sidebar.button("Reset Composition Canvas")
@@ -80,6 +81,17 @@ if insert_button:
         st.session_state["canvas_image"] = np.array(right_image)
     else:
         st.warning("Please upload an image and draw bounding boxes first.")
+
+if generate_button:
+    if "canvas_image" in st.session_state and product_prompt and background_prompt:
+        # Convert the canvas image to PIL format for processing
+        composition_image = Image.fromarray(st.session_state["canvas_image"])
+
+        # Generate the image using the outpainting function
+        result_image = outpaint_with_mask_prompt(composition_image, background_prompt, product_prompt)
+        st.session_state["canvas_image"] = np.array(result_image) # Update the canvas state
+    else:
+        st.warning("Please ensure all fields are filled correctly before generating.")
 
 with col2:
     # Composition Canvas
