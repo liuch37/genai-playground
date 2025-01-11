@@ -8,6 +8,7 @@ from streamlit_drawable_canvas import st_canvas
 from PIL import Image, ImageDraw
 import numpy as np
 from outpainting import outpaint_with_mask_prompt
+from image_tagging import get_product_description
 
 # Set up the page layout
 st.set_page_config(page_title="Content Generation", layout="wide")
@@ -19,7 +20,13 @@ blank_canvas = np.full((*canvas_size, 3), 255, dtype=np.uint8)
 # Sidebar for user controls
 st.sidebar.header("Controls")
 uploaded_image = st.sidebar.file_uploader("Upload an Image for Product Canvas", type=["png", "jpg", "jpeg"])
-product_prompt = st.sidebar.text_input("Enter a Text Prompt for your Product", placeholder="Type your product prompt here...")
+product_description = get_product_description(Image.open(uploaded_image)) if uploaded_image else ""
+# Use the product description as default value in text input
+product_prompt = st.sidebar.text_input(
+    "Enter a Text Prompt for your Product", 
+    value=product_description,
+    placeholder="Type your product prompt here..."
+)
 background_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
 insert_button = st.sidebar.button("Insert Image")
 generate_button = st.sidebar.button("Generate Image")
