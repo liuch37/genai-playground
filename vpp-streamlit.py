@@ -17,14 +17,20 @@ st.set_page_config(page_title="Content Generation", layout="wide")
 canvas_size = (512, 512)
 blank_canvas = np.full((*canvas_size, 3), 255, dtype=np.uint8)
 
+# Initialize product_description in session state if not present
+if "product_description" not in st.session_state:
+    st.session_state.product_description = ""
+
 # Sidebar for user controls
 st.sidebar.header("Controls")
 uploaded_image = st.sidebar.file_uploader("Upload an Image for Product Canvas", type=["png", "jpg", "jpeg"])
-product_description = get_product_description(Image.open(uploaded_image)) if uploaded_image else ""
-# Use the product description as default value in text input
+# Only generate description when image is newly uploaded
+if uploaded_image and st.session_state.product_description == "":
+    st.session_state.product_description = get_product_description(Image.open(uploaded_image))
+# Use the stored product description as default value in text input
 product_prompt = st.sidebar.text_input(
     "Enter a Text Prompt for your Product", 
-    value=product_description,
+    value=st.session_state.product_description,
     placeholder="Type your product prompt here..."
 )
 background_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
