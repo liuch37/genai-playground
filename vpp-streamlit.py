@@ -21,18 +21,29 @@ blank_canvas = np.full((*canvas_size, 3), 255, dtype=np.uint8)
 if "product_description" not in st.session_state:
     st.session_state.product_description = ""
 
+# Initialize last_uploaded_image in session state if not present
+if "last_uploaded_image" not in st.session_state:
+    st.session_state.last_uploaded_image = None
+
 # Sidebar for user controls
 st.sidebar.header("Controls")
 uploaded_image = st.sidebar.file_uploader("Upload an Image for Product Canvas", type=["png", "jpg", "jpeg"])
-# Only generate description when image is newly uploaded
-if uploaded_image and st.session_state.product_description == "":
-    st.session_state.product_description = get_product_description(Image.open(uploaded_image))
+# Generate description whenever a new image is uploaded
+if uploaded_image:
+    # Check if this is a new image upload by comparing with last uploaded image
+    current_image_bytes = uploaded_image.getvalue()
+    if (st.session_state.last_uploaded_image is None or 
+        current_image_bytes != st.session_state.last_uploaded_image):
+        st.session_state.product_description = get_product_description(Image.open(uploaded_image))
+        st.session_state.last_uploaded_image = current_image_bytes
+
 # Use the stored product description as default value in text input
 product_prompt = st.sidebar.text_input(
     "Enter a Text Prompt for your Product", 
     value=st.session_state.product_description,
     placeholder="Type your product prompt here..."
 )
+
 background_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
 insert_button = st.sidebar.button("Insert Image")
 generate_button = st.sidebar.button("Generate Image")

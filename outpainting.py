@@ -45,7 +45,7 @@ def outpaint_with_mask_prompt(pil_image, prompt, mask_prompt):
                 "height": 512,
                 "width": 512,
                 "cfgScale": 8.0,
-                "seed": 42  # Optional: for reproducible results
+                #"seed": 42  # Optional: for reproducible results
             }
         }
 
