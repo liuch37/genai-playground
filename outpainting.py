@@ -5,6 +5,7 @@ import logging
 from PIL import Image
 import numpy as np
 import io
+import random
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
@@ -45,7 +46,7 @@ def outpaint_with_mask_prompt(pil_image, prompt, mask_prompt):
                 "height": 512,
                 "width": 512,
                 "cfgScale": 8.0,
-                #"seed": 42  # Optional: for reproducible results
+                "seed": random.randint(0, 2147483648)
             }
         }
 
