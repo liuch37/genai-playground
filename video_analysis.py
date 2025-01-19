@@ -13,17 +13,21 @@ def get_or_create_project(client):
     """Get existing project or create a new one"""
     try:
         response = client.create_data_automation_project(
-            projectName="video-analysis-project",
+            projectName="video-analysis-project-test-2",
             standardOutputConfiguration={
                 "video": {
                     "extraction": {
-                        # Required parameters
                         "category": {
-                            "state": "ENABLED"
+                            "state": "ENABLED",
+                                "types": ["CONTENT_MODERATION"]
                         },
                         "boundingBox": {
-                            "state": "ENABLED"
+                            "state": "DISABLED"
                         }
+                    },
+                    "generativeField": {
+                        "state": "ENABLED",
+                        "types": ["VIDEO_SUMMARY","SCENE_SUMMARY","IAB"]
                     }
                 }
             }
@@ -101,9 +105,9 @@ def analyze_video(runtime_client, project_arn, video_path):
             status = status_response.get('status')
             print(f"Job status: {status}")
             
-            if status == 'COMPLETED':
+            if status == 'Success':
                 return status_response
-            elif status in ['FAILED', 'CANCELLED', 'ServiceError']:
+            elif status in ['Failed', 'Cancelled', 'ServiceError']:
                 error_message = status_response.get('errorMessage', 'No error message provided')
                 error_code = status_response.get('errorCode', 'No error code provided')
                 raise Exception(f"Job failed with status: {status}, Error Code: {error_code}, Message: {error_message}")
@@ -127,7 +131,7 @@ def save_metadata(results, video_path, output_path):
         }
         
         # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        #os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         # Save metadata to JSON file
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -152,11 +156,12 @@ def main():
         # Analyze the video and get results directly
         print("Starting video analysis...")
         results = analyze_video(bda_runtime_client, project_arn, video_path)
-        
+        print(results)
+
         # Save results to metadata.json
         print(f"Saving analysis results to {output_path}...")
         save_metadata(results, video_path, output_path)
-        print("Analysis complete! Results have been saved to metadata.json")
+        print(f"Analysis complete! Results have been saved to {output_path}")
 
     except Exception as e:
         print(f"An error occurred: {e}")
