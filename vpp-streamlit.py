@@ -1,7 +1,7 @@
 '''
 streamlit run vpp-streamlit.py
 
-pip install streamlit streamlit-drawable-canvas
+pip install streamlit-drawable-canvas==0.9.3 streamlit==1.40.1
 '''
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
