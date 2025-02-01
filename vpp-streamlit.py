@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw
 import numpy as np
 from outpainting import outpaint_with_mask_prompt
 from image_tagging import get_product_description
+from util import rotation, homography_transform
 
 # Set up the page layout
 st.set_page_config(page_title="Content Generation", layout="wide")
@@ -45,6 +46,9 @@ product_prompt = st.sidebar.text_input(
 )
 
 background_prompt = st.sidebar.text_input("Enter a Text Prompt for your Background", placeholder="Type your background prompt here...")
+drawing_mode = st.sidebar.selectbox(
+    "Drawing tool:", ("rect", "transform")
+)
 insert_button = st.sidebar.button("Insert Image")
 generate_button = st.sidebar.button("Generate Image")
 reset_button = st.sidebar.button("Reset Composition Canvas")
@@ -81,7 +85,7 @@ with col1:
         update_streamlit=True,
         height=canvas_size[0],
         width=canvas_size[1],
-        drawing_mode="rect",  # Rectangle drawing mode
+        drawing_mode=drawing_mode,
         key="canvas",
     )
 
@@ -95,11 +99,16 @@ if insert_button:
         for obj in objects:
             if obj["type"] == "rect":
                 x1, y1 = int(obj["left"]), int(obj["top"])
-                x2, y2 = x1 + int(obj["width"]), y1 + int(obj["height"])
-
-                # Resize the left canvas image and insert it into the bounding box
-                left_resized = left_canvas.resize((x2 - x1, y2 - y1))
-                right_image.paste(left_resized, (x1, y1))
+                angle = obj["angle"]
+                width, height = obj["width"], obj["height"]
+                scaleX, scaleY = obj["scaleX"], obj["scaleY"]
+                coordinates = rotation(x1, y1, angle, width*scaleX, height*scaleY)
+                print("Width, Height: ", width, height)
+                print("ScaleX, ScaleY: ", scaleX, scaleY)
+                print("Rotation: ", angle)
+                print("Bounding box: ", coordinates)
+                # Transform the left canvas image and insert it into the bounding box
+                right_image = homography_transform(left_canvas, right_image, coordinates)
 
         # Update the canvas
         st.session_state["canvas_image"] = np.array(right_image)
